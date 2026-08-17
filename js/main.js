@@ -21,6 +21,32 @@ const revealTargets = [
   ".company__info"
 ];
 
+function escapeHTML(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[char]));
+}
+
+function sanitizeStaffDescription(value) {
+  return escapeHTML(value).replace(
+    /&lt;span class=&quot;no-break&quot;&gt;([\s\S]*?)&lt;\/span&gt;/g,
+    '<span class="no-break">$1</span>'
+  );
+}
+
+function safeExternalUrl(value, fallback = "#") {
+  try {
+    const url = new URL(value, window.location.href);
+    return ["https:", "http:"].includes(url.protocol) ? url.href : fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
 function closeMenu() {
   if (!menuButton || !nav) return;
   menuButton.setAttribute("aria-expanded", "false");
@@ -76,20 +102,20 @@ if (staffList) {
   if (data.length) {
     staffList.innerHTML = data.map((staff) => `
       <article class="swiper-slide staff-card">
-        <h3 class="staff-card__name">${staff.nameJa || ""}<small>${staff.nameEn || ""}</small></h3>
+        <h3 class="staff-card__name">${escapeHTML(staff.nameJa)}<small>${escapeHTML(staff.nameEn)}</small></h3>
         <figure class="image-frame">
-          <img src="${staff.image || "images/staff/staff-01.jpg"}" alt="${staff.nameJa || "スタイリスト"}の写真" width="420" height="340">
+          <img src="${safeExternalUrl(staff.image || "images/staff/staff-01.jpg")}" alt="${escapeHTML(staff.nameJa || "スタイリスト")}の写真" width="420" height="340">
         </figure>
         <div class="staff-card__actions">
-          <a href="${staff.instagramUrl || "#"}" aria-label="${staff.nameJa || "スタイリスト"}のInstagram" target="_blank" rel="noopener noreferrer">
+          <a href="${safeExternalUrl(staff.instagramUrl || "#")}" aria-label="${escapeHTML(staff.nameJa || "スタイリスト")}のInstagram" target="_blank" rel="noopener noreferrer">
             <img src="images/staff/instagram-icon.png" alt="" width="42" height="42">
           </a>
-          ${staff.externalUrl ? `<a href="${staff.externalUrl}" aria-label="${staff.nameJa || "スタイリスト"}の外部リンク" target="_blank" rel="noopener noreferrer">
+          ${staff.externalUrl ? `<a href="${safeExternalUrl(staff.externalUrl)}" aria-label="${escapeHTML(staff.nameJa || "スタイリスト")}の外部リンク" target="_blank" rel="noopener noreferrer">
             <img src="images/staff/external-link-icon-fixed.png" alt="" width="42" height="42">
           </a>` : ""}
         </div>
-        ${staff.role ? `<h4 class="staff-card__role">${staff.role}</h4>` : ""}
-        <p class="staff-card__text">${staff.description || ""}</p>
+        ${staff.role ? `<h4 class="staff-card__role">${escapeHTML(staff.role)}</h4>` : ""}
+        <p class="staff-card__text">${sanitizeStaffDescription(staff.description)}</p>
       </article>
     `).join("");
   } else {
