@@ -134,6 +134,7 @@ if (voiceSwiperEl && typeof Swiper !== "undefined") {
     loop: voiceSlides > 3,
     watchOverflow: true,
     keyboard: { enabled: true },
+    centeredSlides: true,
     slidesPerView: 1.08,
     spaceBetween: 18,
     pagination: {
@@ -146,10 +147,12 @@ if (voiceSwiperEl && typeof Swiper !== "undefined") {
     },
     breakpoints: {
       821: {
+        centeredSlides: false,
         slidesPerView: 2.2,
         spaceBetween: 24
       },
       1181: {
+        centeredSlides: false,
         slidesPerView: 3,
         spaceBetween: 34
       }
